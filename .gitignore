@@ -1,0 +1,7 @@
+# 忽略所有 .xlsx 文件
+*.xlsx
+
+# 忽略 SQLite 数据库文件及其相关文件
+agent_memory.db
+agent_memory.db-shm
+agent_memory.db-wal

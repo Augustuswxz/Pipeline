@@ -1,0 +1,64 @@
+[
+    {
+        "standard": "绝对距离(m)",
+        "aliases": [
+            "里程",
+            "Absolute Distance",
+            "环焊缝里程"
+        ]
+    },
+    {
+        "standard": "相对距离(m)",
+        "aliases": [
+            "距环焊缝距离",
+            "Relative Distance"
+        ]
+    },
+    {
+        "standard": "上游环焊缝编号",
+        "aliases": [
+            "Upstream Girth Weld",
+            "weld_id",
+            "序号",
+            "管节编号"
+        ]
+    },
+    {
+        "standard": "深度(%)",
+        "aliases": [
+            "深度",
+            "peak depth",
+            "Peak Depth"
+        ]
+    },
+    {
+        "standard": "长度(mm)",
+        "aliases": [
+            "长度",
+            "length",
+            "Length"
+        ]
+    },
+    {
+        "standard": "宽度(mm)",
+        "aliases": [
+            "宽度",
+            "width",
+            "Width"
+        ]
+    },
+    {
+        "standard": "时钟方位",
+        "aliases": [
+            "orientation",
+            "Orientation"
+        ]
+    },
+    {
+        "standard": "天津大学",
+        "aliases": [
+            "北洋大学",
+            "河北工学院"
+        ]
+    }
+]
