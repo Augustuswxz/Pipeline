@@ -1,66 +1,270 @@
 [
     {
-        "standard": "绝对距离(m)",
+        "standard": "Log distance(m)",
         "aliases": [
+            "绝对距离",
+            "绝对距离(m)",
             "里程",
+            "里程[m]",
+            "里程(m)",
             "Absolute Distance",
-            "环焊缝里程"
+            "Absolute Distance(m)",
+            "Absolute Distance(metres)",
+            "Absolute Distance[metres]",
+            "Absolute Distance[m]"
         ]
     },
     {
-        "standard": "相对距离(m)",
+        "standard": "Up weld dist.(m)",
         "aliases": [
+            "缺陷距环焊缝距离(m)",
+            "相对距离",
+            "相对距离(m)",
             "距环焊缝距离",
-            "Relative Distance"
+            "上游环焊距离",
+            "Relative Distance",
+            "Relative Distance(m)",
+            "Relative Distance(metres)",
+            "Relative Distance[metres]",
+            "Relative Distance[m]"
         ]
     },
     {
-        "standard": "上游环焊缝编号",
+        "standard": "Down weld dist.(m)",
+        "aliases": [
+            "下游环焊距离"
+        ]
+    },
+    {
+        "standard": "Upstream girth weld",
         "aliases": [
             "Upstream Girth Weld",
+            "上游环焊缝编号",
+            "upstream weld",
             "weld_id",
-            "序号",
+            "前环编号",
             "管节编号"
         ]
     },
     {
-        "standard": "深度(%)",
+        "standard": "Peak depth(%)",
         "aliases": [
+            "深度(%)",
+            "深度[%]",
             "深度",
             "peak depth",
-            "Peak Depth"
+            "Peak Depth",
+            "Peak Depth(%)",
+            "Peak Depth(%wt)"
         ]
     },
     {
-        "standard": "长度(mm)",
+        "standard": "Length(mm)",
         "aliases": [
+            "长度(mm)",
+            "长度[mm]",
             "长度",
             "length",
             "Length"
         ]
     },
     {
-        "standard": "宽度(mm)",
+        "standard": "Width(mm)",
         "aliases": [
+            "宽度(mm)",
+            "宽度[mm]",
             "宽度",
             "width",
             "Width"
         ]
     },
     {
-        "standard": "时钟方位",
+        "standard": "Clock position(h:min)",
         "aliases": [
+            "时钟方位",
             "orientation",
-            "Orientation"
+            "Orientation",
+            "Orientation(h:min)",
+            "Orientation(hrs:mins)",
+            "钟点(hh:mm)"
         ]
     },
     {
-        "standard": "天津大学",
+        "standard": "Feature type",
         "aliases": [
-            "北洋大学",
-            "河北工学院",
-            "国立北洋大学",
-            "TJU"
+            "部件/缺陷类型",
+            "部件类型",
+            "缺陷类型",
+            "特征名称"
+        ]
+    },
+    {
+        "standard": "Feature identification",
+        "aliases": [
+            "部件/缺陷识别",
+            "部件识别",
+            "缺陷识别"
+        ]
+    },
+    {
+        "standard": "Nominal t(mm)",
+        "aliases": [
+            "壁厚",
+            "标称壁厚",
+            "标称壁厚(mm)",
+            "标称壁厚[mm]",
+            "Nominal t[mm]",
+            "Nominal t"
+        ]
+    },
+    {
+        "standard": "Inner diameter(mm)",
+        "aliases": [
+            "内径ID[mm]",
+            "内径ID(mm)",
+            "内径ID",
+            "Inner diameter",
+            "Inner diameter[mm]"
+        ]
+    },
+    {
+        "standard": "Spiral weld end clock",
+        "aliases": [
+            "螺旋焊缝结束时钟"
+        ]
+    },
+    {
+        "standard": "Geometric variation(%)",
+        "aliases": [
+            "几何变化量(%)",
+            "几何变化量[%]",
+            "Geometric variation[%]"
+        ]
+    },
+    {
+        "standard": "ERF",
+        "aliases": [
+            "ERF ASME"
+        ]
+    },
+    {
+        "standard": "Surface loc.",
+        "aliases": [
+            "表面位置"
+        ]
+    },
+    {
+        "standard": "Comments",
+        "aliases": [
+            "备注"
+        ]
+    },
+    {
+        "standard": "Position classification",
+        "aliases": [
+            "位置分类"
+        ]
+    },
+    {
+        "standard": "Grading",
+        "aliases": [
+            "分级"
+        ]
+    },
+    {
+        "standard": "Delta north",
+        "aliases": [
+            "Delta North"
+        ]
+    },
+    {
+        "standard": "Delta east",
+        "aliases": [
+            "Delta East"
+        ]
+    },
+    {
+        "standard": "Delta alt",
+        "aliases": [
+            "Delta Alt"
+        ]
+    },
+    {
+        "standard": "Pipe section length(m)",
+        "aliases": [
+            "Pipe section length",
+            "管节长度",
+            "管节长度[m]",
+            "管节长度(m)"
+        ]
+    },
+    {
+        "standard": "Index",
+        "aliases": [
+            "序号"
+        ]
+    },
+    {
+        "standard": "Metal loss type",
+        "aliases": [
+            "金属损失类型"
+        ]
+    },
+    {
+        "standard": "Anchor description",
+        "aliases": [
+            "定位点描述"
+        ]
+    },
+    {
+        "standard": "Direction",
+        "aliases": [
+            "方位"
+        ]
+    },
+    {
+        "standard": "Mark dis.(m)",
+        "aliases": [
+            "距离(m)"
+        ]
+    },
+    {
+        "standard": "In/Out",
+        "aliases": [
+            "内/外壁",
+            "内/外"
+        ]
+    },
+    {
+        "standard": "Entering clock position",
+        "aliases": [
+            "进钟点"
+        ]
+    },
+    {
+        "standard": "Leaving clock position",
+        "aliases": [
+            "出钟点"
+        ]
+    },
+    {
+        "standard": "Height(m)",
+        "aliases": [
+            "高程(m)"
+        ]
+    },
+    {
+        "standard": "Longitude(°E)",
+        "aliases": [
+            "经度(°E)",
+            "经度"
+        ]
+    },
+    {
+        "standard": "(Latitude°N)",
+        "aliases": [
+            "纬度(°N)",
+            "纬度"
         ]
     }
 ]

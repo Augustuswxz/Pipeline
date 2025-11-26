@@ -150,6 +150,7 @@ def build_graph():
     graph.add_edge("data_clean", END)
     # graph.add_edge("data_alignment", END)
     graph.add_edge("kb_tool_executor", "kb_management")
+    # graph.add_edge("kb_tool_executor", END)
     graph.add_edge("ask_user", "save")
     graph.add_edge("save", "expert_ask")
     # 4. 形成闭环：处理完后，跳回 Ask 询问是否还要改

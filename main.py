@@ -26,7 +26,8 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 if "thread_id" not in st.session_state:
-    st.session_state.thread_id = "user_streamlit_001"
+    # st.session_state.thread_id = "user_streamlit_001"
+    st.session_state.thread_id = str(uuid.uuid4())[:8]
 
 if "graph" not in st.session_state:
     st.session_state.graph = build_graph()
