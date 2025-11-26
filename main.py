@@ -175,7 +175,9 @@ if user_input := st.chat_input("请输入你的指令…"):
             events = None # 初始化事件生成器
 
             # B. 检查是否处于“暂停/中断”状态
-            if snapshot.next:
+            is_paused_at_ask_user = snapshot.next and "ask_user" in snapshot.next
+            
+            if is_paused_at_ask_user:
                 # --- 分支 1: 恢复模式 (Resume) ---
                 # snapshot.next 不为空，说明上次运行在某个节点停下了（比如 ask_user）
                 st.toast("检测到进行中的任务，正在继续...", icon="🔄")
