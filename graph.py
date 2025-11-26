@@ -19,6 +19,7 @@ from typing import List
 from typing_extensions import TypedDict
 
 from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.memory import MemorySaver
 import sqlite3 # 确保导入了 sqlite3
 
 from node_wrapper import node_wrapper
@@ -134,13 +135,12 @@ def build_graph():
     print("=== Graph 构建完成 ===")
 
     # ★★★★★ 核心：持久化记忆（SQLite）
-    # checkpointer = SqliteSaver.from_file("agent_memory.db")
-    # checkpointer = SqliteSaver("agent_memory.db")
     conn = sqlite3.connect("agent_memory.db", check_same_thread=False)
     checkpointer = SqliteSaver(conn)
+    # 短期记忆
+    # checkpointer = MemorySaver() 
 
     return graph.compile(interrupt_after=["ask_user"], checkpointer=checkpointer)
-
 
 # ========== 8. 交互式测试代码 ==========
 if __name__ == "__main__":

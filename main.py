@@ -7,195 +7,9 @@ import streamlit.components.v1 as components
 import sys
 import builtins
 import io
-
-# =============================================================
-# 🔥 核心修复：强力 Print 捕获器 (Hook builtins.print)
-# =============================================================
-class AggressivePrintCapture:
-    """
-    这是一个强力捕获器。
-    它不依赖 sys.stdout 重定向，而是直接 Hook 掉 Python 的 print 函数。
-    """
-    def __init__(self):
-        self.log_buffer = []
-        self.original_print = builtins.print
-        self.log_placeholder = None
-
-    def set_placeholder(self, placeholder):
-        self.log_placeholder = placeholder
-
-    def _hooked_print(self, *args, **kwargs):
-        # 1. 构建输出字符串
-        sep = kwargs.get('sep', ' ')
-        end = kwargs.get('end', '\n')
-        text = sep.join(map(str, args)) + end
-
-        # 2. 🔥 强制写入 VS Code 真实终端 (绕过 Streamlit 封装)
-        try:
-            sys.__stdout__.write(text)
-            sys.__stdout__.flush()
-        except Exception:
-            pass
-
-        # 3. 记录到内存 buffer
-        self.log_buffer.append(text)
-
-        # 4. (可选) 实时显示在网页顶部，产生“刷屏”效果
-        if self.log_placeholder:
-            # 只显示最近的 5 行，避免太长
-            recent_logs = "".join(self.log_buffer[-5:])
-            self.log_placeholder.code(recent_logs, language="text")
-
-    def get_all_logs(self):
-        return "".join(self.log_buffer)
-
-    def __enter__(self):
-        builtins.print = self._hooked_print
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        builtins.print = self.original_print
-
-
-# =============================================================
-# Mermaid 渲染函数
-# =============================================================
-def render_mermaid_html(mermaid_code, height=300):
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-    </head>
-    <body>
-        <div class="mermaid">
-            {mermaid_code}
-        </div>
-        <script>
-            mermaid.initialize({{
-                startOnLoad: true,
-                theme: 'default',
-                securityLevel: 'loose',
-            }});
-        </script>
-    </body>
-    </html>
-    """
-    components.html(html_content, height=height, scrolling=False)
-
-def render_flowchart_stepwise(container, mode: str, interval=0.8):
-    clean_steps = [
-        "表格结构解析",
-        "知识库自动识别",
-        "结构模板映射",
-        "单位转换及量纲标准化",
-        "结构统一及语义统一的标准化数据",
-    ]
-
-    align_steps = [
-        "标准化数据",
-        "业务场景分析",
-        "锚点识别",
-        "焊缝/三桩度量",
-        "锚点对齐",
-        "缺陷分析与度量",
-        "缺陷对齐",
-        "多源合并数据",
-    ]
-
-    STEPS = clean_steps if mode == "clean" else align_steps
-    TITLE = "清洗流程" if mode == "clean" else "对齐流程"
-    
-    placeholder = container.empty()
-    
-    for i in range(1, len(STEPS) + 1):
-        current_steps = STEPS[:i]
-        lines = ["flowchart LR"]
-        lines.append(f'    subgraph {TITLE} ["🚀 {TITLE}"]')
-        lines.append("    direction LR")
-        
-        for idx, s in enumerate(current_steps):
-            node_id = f"Node{idx}"
-            if idx == i - 1:
-                lines.append(f'        {node_id}["✨ {s}"]:::active')
-            else:
-                lines.append(f'        {node_id}["{s}"]')
-        
-        for idx in range(len(current_steps) - 1):
-            lines.append(f"        Node{idx} --> Node{idx+1}")
-            
-        lines.append("    end")
-        lines.append("    classDef active fill:#f96,stroke:#333,stroke-width:2px,color:white;")
-        
-        final_code = "\n".join(lines)
-        with placeholder:
-            render_mermaid_html(final_code, height=250)
-        time.sleep(interval)
-
-# =============================================================
-# 渲染节点信息
-# =============================================================
-def render_step_details(container, value, node_name):
-    container.markdown(f"#### ⚙️ 正在执行节点: `{node_name}`")
-
-    if isinstance(value, dict) and "memory" in value and value["memory"]:
-        with container.expander("🧠 记忆更新", expanded=False):
-            st.json(value["memory"])
-
-    if isinstance(value, dict) and "messages" in value and value["messages"]:
-        last_msg = value["messages"][-1]
-        content = getattr(last_msg, "content", str(last_msg))
-
-        if isinstance(last_msg, AIMessage):
-            container.info(f"🤖 **节点输出**:\n{content}")
-        else:
-            container.write(f"👤 **输入**:\n{content}")
-    
-    container.divider()
-
-# =============================================================
-# 🔥 新增工具函数：渲染消息内容及下载按钮
-# =============================================================
-def render_message_content(content, unique_key_prefix):
-    """
-    渲染消息文本，并检测是否有文件下载标记 [FILE:xxx]。
-    如果有，则渲染下载按钮。
-    """
-    st.markdown(content)
-    
-    # 检测文件标记
-    generated_files = re.findall(r"\[FILE:(.*?)\]", content)
-    
-    if generated_files:
-        st.markdown("---") # 分割线
-        st.caption("📁 检测到生成文件：")
-        
-        for idx, filename in enumerate(generated_files):
-            filepath = os.path.join("GeneratedFiles", filename)
-            
-            # 确保每个按钮有唯一的 key，否则 Streamlit 会报错
-            btn_key = f"dl_{unique_key_prefix}_{idx}_{filename}"
-            
-            if os.path.exists(filepath):
-                with open(filepath, "rb") as f:
-                    st.download_button(
-                        label=f"⬇️ 下载 {filename}",
-                        data=f.read(),
-                        file_name=filename,
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        key=btn_key
-                    )
-            else:
-                st.warning(f"⚠️ 文件已过期或不存在：{filename}")
-
-# =============================================================
-# 导入图（Graph）
-# =============================================================
-try:
-    from graph import build_graph
-except:
-    st.error("❌ 找不到 graph.py / build_graph，请检查文件结构")
-    st.stop()
+import uuid
+from render import AggressivePrintCapture, render_mermaid_html, render_flowchart_stepwise, render_step_details, render_message_content
+from graph import build_graph
 
 # =============================================================
 # Streamlit 页面设置
@@ -217,7 +31,7 @@ if "thread_id" not in st.session_state:
 if "graph" not in st.session_state:
     st.session_state.graph = build_graph()
 
-config = {"configurable": {"thread_id": st.session_state.thread_id}}
+# config = {"configurable": {"thread_id": st.session_state.thread_id}}
 
 # 业务场景
 ALIGNMENT_TYPES = {
@@ -232,19 +46,56 @@ ALIGNMENT_TYPES = {
 # =============================================================
 with st.sidebar:
     st.header("🛠️ 数据任务面板")
-
-    def update_agent_memory(new_data_dict):
+    st.write(f"当前会话: `{st.session_state.thread_id}`")
+    
+    if st.button("🧹 开启新对话", use_container_width=True):
+        # A. 获取旧记忆（保留文件）
         try:
-            current_state = st.session_state.graph.get_state(config)
+            # 注意：这里要临时构建一个旧的 config 来读取旧记忆
+            old_config = {"configurable": {"thread_id": st.session_state.thread_id}}
+            current_state = st.session_state.graph.get_state(old_config)
+            saved_memory = current_state.values.get("memory", {})
+        except:
+            saved_memory = {}
+            
+        # B. 生成新 ID
+        new_thread_id = str(uuid.uuid4())[:8]
+        st.session_state.thread_id = new_thread_id
+        
+        # C. 初始化新线程 (关键：写入记忆，但不带任何 next 状态)
+        new_config = {"configurable": {"thread_id": new_thread_id}}
+        st.session_state.graph.update_state(
+            new_config, 
+            {"messages": [], "memory": saved_memory} # 仅写入记忆
+        )
+        
+        # D. 清空前端显示
+        st.session_state.messages = []
+        
+        # E. ★★★ 强制立刻重启脚本 ★★★
+        # 这确保了下面的代码会使用新的 ID 重新运行
+        st.rerun()
+
+    # 记忆更新函数
+    def update_agent_memory(new_data_dict):
+        # 🔥 修复核心：在函数内部动态构建 config，确保它是最新的且已定义的
+        # 依赖 st.session_state.thread_id，这个变量在代码顶部已经初始化了，所以是安全的
+        local_config = {"configurable": {"thread_id": st.session_state.thread_id}}
+
+        try:
+            current_state = st.session_state.graph.get_state(local_config)
             current_memory = current_state.values.get("memory", {}) if current_state.values else {}
             current_memory.update(new_data_dict)
-            st.session_state.graph.update_state(config, {"memory": current_memory})
+            
+            # 使用 local_config 更新状态
+            st.session_state.graph.update_state(local_config, {"memory": current_memory})
             st.toast(f"🧠 记忆已更新: {new_data_dict}")
         except Exception as e:
             st.error(f"记忆同步失败: {e}")
 
     tab_clean, tab_align = st.tabs(["🧹 数据清洗", "🧩 数据对齐"])
 
+    # 数据清洗栏
     with tab_clean:
         st.caption("上传单个文件进行格式清洗")
         clean_file = st.file_uploader("选择文件", type=["xlsx", "xls"], key="clean_file")
@@ -255,6 +106,7 @@ with st.sidebar:
             update_agent_memory({"cleaning_target": clean_file.name})
             st.success(f"已就绪：{clean_file.name}")
 
+    # 数据对齐栏
     with tab_align:
         st.caption("上传两个文件进行缺陷与焊缝锚点对齐")
 
@@ -300,7 +152,7 @@ for i, msg in enumerate(st.session_state.messages):
     with st.chat_message("user" if isinstance(msg, HumanMessage) else "assistant"):
         render_message_content(msg.content, unique_key_prefix=f"history_{i}")
 
-
+config = {"configurable": {"thread_id": st.session_state.thread_id}}
 # =============================================================
 # 处理用户输入
 # =============================================================
@@ -317,10 +169,40 @@ if user_input := st.chat_input("请输入你的指令…"):
         capturer = AggressivePrintCapture()
 
         try:
-            inputs = {"messages": [HumanMessage(content=user_input)]}
-            mode = None
-            if "清洗" in user_input: mode = "clean"
-            if "对齐" in user_input: mode = "align"
+            snapshot = st.session_state.graph.get_state(config)
+        
+            inputs = None
+            events = None # 初始化事件生成器
+
+            # B. 检查是否处于“暂停/中断”状态
+            if snapshot.next:
+                # --- 分支 1: 恢复模式 (Resume) ---
+                # snapshot.next 不为空，说明上次运行在某个节点停下了（比如 ask_user）
+                st.toast("检测到进行中的任务，正在继续...", icon="🔄")
+                
+                # 1. 将用户的输入（例如 "A" 或 "B"）注入到状态中
+                # as_node="ask_user" 表示把这条消息当作是 ask_user 节点接收到的后续输入
+                st.session_state.graph.update_state(
+                    config, 
+                    {"messages": [HumanMessage(content=user_input)]},
+                    as_node="ask_user"  # 👈 确保这里跟你的图结构中产生中断的节点名一致
+                )
+                
+                # 2. 继续运行 (传入 None 表示从断点继续)
+                # 此时 mode 设为 None 或特定值，避免渲染错误的思维导图
+                inputs = None
+                mode = None 
+
+            else:
+                # --- 分支 2: 新任务模式 (New Run) ---
+                # 之前的流程已结束，这是全新的请求
+                mode = None
+                if "清洗" in user_input: mode = "clean"
+                if "对齐" in user_input: mode = "align"
+                
+                # 1. 构建标准输入
+                inputs = {"messages": [HumanMessage(content=user_input)]}
+                
 
             # 2. 思维导图动画
             if mode:

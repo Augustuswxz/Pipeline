@@ -1,5 +1,5 @@
 # Tools/KBManager.py 或 config_tools.py
-from Tools.KBManager import (
+from Tools.KB_manage_tools.KBManager import (
     view_knowledge_base, 
     update_knowledge_base, 
     delete_knowledge_base, 

@@ -1,7 +1,7 @@
-from Tools.clean import clean_excel_tool
+from Tools.clean_tools.clean import clean_excel_tool
 from langchain_core.messages import AIMessage
 # 复用之前的提取器，因为它有 filename 字段
-from Tools.mapping_manager import MappingManager
+from Tools.KB_manage_tools.mapping_manager import MappingManager
 
 def node_data_cleaning(state):
     print("=== 🧹 进入数据清洗节点 (Data Cleaning) ===")

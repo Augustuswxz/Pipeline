@@ -1,10 +1,10 @@
 from agent_state import AgentState
 from langchain_core.messages import AIMessage
-from Tools.alignment_param_extractor import alignment_param_extractor
-# from Tools.AlignmentMemory import AlignmentMemory
+from Tools.align_tools.alignment_param_extractor import alignment_param_extractor
+from Tools.align_tools.alignment_memory import AlignmentMemory
 
 # 引入你所有的具体执行工具
-from Tools.aligndefect import pipeline_alignment_tool  # 假设这是内检测
+from Tools.align_tools.align_defect import pipeline_alignment_tool  # 假设这是内检测
 # from Tools.align import data_alignment_tool            # 假设这是其他
 # from Tools.construction import construction_tool     # 假设这是建设期
 
@@ -74,8 +74,8 @@ def node_align_process(state: AgentState):
     current_vector = [0.1, 0.2, 0.3] 
 
     # E. 查库
-    # db = AlignmentMemory()
-    # match = db.search_similar(current_vector)
+    db = AlignmentMemory()
+    match = db.search_similar(current_vector)
     
     candidates = {}
     match_found = False

@@ -1,6 +1,6 @@
 # Tools/config_tools.py
 from langchain.tools import tool
-from Tools.mapping_manager import MappingManager
+from Tools.KB_manage_tools.mapping_manager import MappingManager
 import json
 from typing import List, Optional
 
