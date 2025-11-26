@@ -263,9 +263,9 @@ if user_input := st.chat_input("请输入你的指令…"):
                 captured_text_filtered = '\n'.join(log_lines) + '\n' if log_lines else ''
 
                 # 5a. 渲染到临时容器 (满足在回答上方的要求)
-                log_display_container.markdown("---")
-                log_display_container.markdown("### 🧾 过程日志 (Process Logs)")
-                log_display_container.code(captured_text_filtered, language="text")
+                # log_display_container.markdown("---")
+                # log_display_container.markdown("### 🧾 过程日志 (Process Logs)")
+                # log_display_container.code(captured_text_filtered, language="text")
 
                 # 5b. 准备历史记录的保存格式 (使用过滤后的日志)
                 if captured_text_filtered.strip():
