@@ -15,12 +15,12 @@ def node_align_process(state: AgentState):
     print("=== 1. 进入对齐计算节点 (Process) ===")
 
     # 测试
-    msg_content = "计算完成，发现相似历史场景，已生成双重方案。"
-    match_found = True
-    return {
-        "messages": [AIMessage(content=msg_content)],
-        "align_match_found": match_found,
-    }
+    # msg_content = "计算完成，发现相似历史场景，已生成双重方案。"
+    # match_found = True
+    # return {
+    #     "messages": [AIMessage(content=msg_content)],
+    #     "align_match_found": match_found,
+    # }
     
     messages = state["messages"]
     memory = state.get("memory", {})
@@ -94,7 +94,8 @@ def node_align_process(state: AgentState):
             return f"执行出错: {str(e)}"
 
     # --- 情况 1: 跑默认参数 (方案 A) ---
-    res_default = run_alignment(extracted_threshold, "默认方案")
+    # res_default = run_alignment(extracted_threshold, "默认方案")
+    res_default = "Default res"
     candidates["Default"] = res_default
     
     # --- 情况 2: 如果命中历史，跑专家参数 (方案 B) ---
@@ -107,12 +108,13 @@ def node_align_process(state: AgentState):
         expert_val = match['c_value'] 
         
         # 容错：如果数据库里存的 c_value 是空的，就还是用默认
-        expert_threshold = expert_val if expert_val else extracted_threshold
+        # expert_threshold = expert_val if expert_val else extracted_threshold
         
         # 跑专家方案
         # 注意：这里我们假设专家调整的是“阈值”，如果专家调整的是其他逻辑，
         # 你可能需要给 Tool 传不同的参数
-        res_expert = run_alignment(expert_threshold, "专家方案")
+        # res_expert = run_alignment(expert_threshold, "专家方案")
+        res_expert = "Expert"
         candidates["Expert"] = res_expert
         
         msg_content = "计算完成，发现相似历史场景，已生成双重方案。"

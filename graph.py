@@ -13,6 +13,8 @@ from Agent_Nodes.node_align_process import node_align_process
 from Agent_Nodes.node_align_ask_user import node_align_ask_user
 from Agent_Nodes.node_align_save import node_align_save
 from Agent_Nodes.node_kb_management import node_kb_management
+from Agent_Nodes.node_expert_ask import node_expert_ask
+from Agent_Nodes.node_expert_process import node_expert_process
 from langgraph.prebuilt import ToolNode, tools_condition
 
 from typing import List
@@ -25,6 +27,7 @@ import sqlite3 # 确保导入了 sqlite3
 from node_wrapper import node_wrapper
 
 def route_logic(state: AgentState):
+    '''用户输入意图识别'''
     print("=== AI Semantic Router (智能路由) ===")
 
     # 1. 获取用户最新消息
@@ -62,6 +65,13 @@ def route_after_process(state):
     else:
         return "node_align_save"      # 无匹配 -> 直接去保存
 
+def route_expert(state):
+    """判断是否添加专家反馈"""
+    msg = state["messages"][-1].content.strip().lower()
+    if msg in ["不用", "结束", "no", "exit", "quit", "完成"]:
+        return "end"
+    return "process"
+
 # 空节点作为入口
 def router_entry_node(state: AgentState):
     pass
@@ -78,7 +88,6 @@ def build_graph():
     # ★★★ 注册新节点 (注意名字要对应路由表中的 Value) ★★★
     graph.add_node("data_clean", node_wrapper(node_data_cleaning))      
     # 对应 "node_data_cleaning": "data_clean"
-    # graph.add_node("data_alignment", node_wrapper(node_data_alignment))
     # 对应 "node_data_alignment": "data_alignment"
     graph.add_node("kb_management", node_kb_management)
     # 知识库管理工具
@@ -88,6 +97,8 @@ def build_graph():
     graph.add_node("process", node_align_process)
     graph.add_node("ask_user", node_align_ask_user)
     graph.add_node("save", node_align_save)
+    graph.add_node("expert_ask", node_expert_ask)    # 新节点
+    graph.add_node("expert_process", node_expert_process) # 新节点
 
     # 入口节点
     graph.set_entry_point("router")
@@ -125,12 +136,24 @@ def build_graph():
         }
     )
 
+    # 询问用户是否添加专家反馈的节点
+    graph.add_conditional_edges(
+        "expert_ask",
+        route_expert,
+        {
+            "process": "expert_process", # 用户输入了内容 -> 去处理
+            "end": END                   # 用户说不用 -> 结束
+        }
+    )
+
     graph.add_edge("llm", END)
     graph.add_edge("data_clean", END)
     # graph.add_edge("data_alignment", END)
     graph.add_edge("kb_tool_executor", "kb_management")
     graph.add_edge("ask_user", "save")
-    graph.add_edge("save", END)
+    graph.add_edge("save", "expert_ask")
+    # 4. 形成闭环：处理完后，跳回 Ask 询问是否还要改
+    graph.add_edge("expert_process", "expert_ask")
 
     print("=== Graph 构建完成 ===")
 
@@ -140,7 +163,7 @@ def build_graph():
     # 短期记忆
     # checkpointer = MemorySaver() 
 
-    return graph.compile(interrupt_after=["ask_user"], checkpointer=checkpointer)
+    return graph.compile(interrupt_after=["ask_user", "expert_ask"], checkpointer=checkpointer)
 
 # ========== 8. 交互式测试代码 ==========
 if __name__ == "__main__":

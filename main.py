@@ -175,19 +175,28 @@ if user_input := st.chat_input("请输入你的指令…"):
             events = None # 初始化事件生成器
 
             # B. 检查是否处于“暂停/中断”状态
-            is_paused_at_ask_user = snapshot.next and "ask_user" in snapshot.next
-            
-            if is_paused_at_ask_user:
+            print("snapshot.next : ", snapshot.next)
+            # is_paused_at_ask_user = snapshot.next and "save" in snapshot.next
+
+            if snapshot.next and "router" not in snapshot.next:
                 # --- 分支 1: 恢复模式 (Resume) ---
                 # snapshot.next 不为空，说明上次运行在某个节点停下了（比如 ask_user）
                 st.toast("检测到进行中的任务，正在继续...", icon="🔄")
+
+                resume_node = None
+                if "save" in snapshot.next:
+                    resume_node = "ask_user"
+                    print(f"DEBUG: 恢复断点 ask_user -> save")
+                elif "expert_process" in snapshot.next:
+                    resume_node = "expert_ask"
+                    print(f"DEBUG: 恢复断点 expert_ask -> process/end")
                 
                 # 1. 将用户的输入（例如 "A" 或 "B"）注入到状态中
                 # as_node="ask_user" 表示把这条消息当作是 ask_user 节点接收到的后续输入
                 st.session_state.graph.update_state(
                     config, 
                     {"messages": [HumanMessage(content=user_input)]},
-                    as_node="ask_user"  # 👈 确保这里跟你的图结构中产生中断的节点名一致
+                    as_node=resume_node  # 👈 确保这里跟你的图结构中产生中断的节点名一致
                 )
                 
                 # 2. 继续运行 (传入 None 表示从断点继续)
