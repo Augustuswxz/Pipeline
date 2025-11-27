@@ -12,3 +12,6 @@ class AgentState(TypedDict):
     align_candidates: dict          # 新增 对齐时提供的候选方案，供用户选择
     align_match_found: bool         # 新增 对齐时从对齐记忆库检索是否有特征向量接近的记录
     current_record_id: Optional[str] # 新增 当前存储进对齐记忆库记录的id
+    default_thresholds_vector: List[float] # 默认五维阈值
+    expert_thresholds_vector: List[float] # 专家五维阈值
+    record_min_confidence: float

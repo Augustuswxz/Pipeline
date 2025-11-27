@@ -4,12 +4,14 @@ from langgraph.types import interrupt, Command
 def node_align_ask_user(state):
     print("=== 2. 展示选项并暂停 ===")
     candidates = state["align_candidates"]
+    default_thresholds_vector = state["default_thresholds_vector"]
+    expert_thresholds_vector = state["expert_thresholds_vector"]
     
     # 构造展示给用户的消息
     msg = f"""✅ 发现相似历史场景！已为您生成两份对齐结果：
     
-    # 1️⃣ 方案 A (默认计算): {candidates['Default']}
-    # 2️⃣ 方案 B (历史相似记录专家意见): {candidates['Expert']}
+    # 1️⃣ 方案 A (默认计算): {candidates['Default']}, 采用阈值设置为: {default_thresholds_vector}
+    # 2️⃣ 方案 B (历史相似记录专家意见): {candidates['Expert']}, 采用阈值设置为: {expert_thresholds_vector}
     
     请回复 "A" 或 "B" 进行选择。"""
     

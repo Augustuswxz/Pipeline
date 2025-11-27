@@ -159,5 +159,9 @@ def node_align_process(state: AgentState):
         "align_vector": file_vector,
         "align_candidates": candidates,
         "align_match_found": match_found,
-        "memory": memory # 保持记忆
+        "memory": memory, # 保持记忆
+        "default_thresholds_vector": default_thresholds,
+        "expert_thresholds_vector": expert_thresholds,
+        "context_data": data,
+        "record_min_confidence": calculated_min_confidence
     }
