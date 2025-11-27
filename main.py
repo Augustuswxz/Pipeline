@@ -270,10 +270,10 @@ if user_input := st.chat_input("请输入你的指令…"):
 
                 # 5b. 准备历史记录的保存格式 (使用过滤后的日志)
                 if captured_text_filtered.strip():
-                    log_section_for_history = f"\n\n---\n**🧾 过程日志 (Process Logs):**\n```text\n{captured_text_filtered}\n```"
+                    log_section_for_history = f"**🧾 过程日志 (Process Logs):**\n```text\n{captured_text_filtered}\n```\n\n---\n\n"
             
             # 6. 组合最终内容 (LLM文本 + 历史日志)
-            full_response_with_logs = llm_response_text + log_section_for_history
+            full_response_with_logs = log_section_for_history + llm_response_text
 
             # 清空 streaming placeholder
             message_placeholder.empty()

@@ -47,6 +47,13 @@
         ]
     },
     {
+        "standard": "lxt",
+        "aliases": [
+            "wxz",
+            "lzx"
+        ]
+    },
+    {
         "standard": "Peak depth(%)",
         "aliases": [
             "深度(%)",
@@ -123,6 +130,9 @@
             "内径ID[mm]",
             "内径ID(mm)",
             "内径ID",
+            "内径",
+            "内径 ID",
+            "内径 ID [mm]",
             "Inner diameter",
             "Inner diameter[mm]"
         ]
@@ -136,6 +146,8 @@
     {
         "standard": "Geometric variation(%)",
         "aliases": [
+            "几何变化量 [%]",
+            "几何变化量",
             "几何变化量(%)",
             "几何变化量[%]",
             "Geometric variation[%]"
@@ -162,7 +174,8 @@
     {
         "standard": "Position classification",
         "aliases": [
-            "位置分类"
+            "位置分类",
+            "位置 分类"
         ]
     },
     {

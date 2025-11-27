@@ -4,7 +4,8 @@ from Tools.align_tools.alignment_param_extractor import alignment_param_extracto
 from Tools.align_tools.alignment_memory import AlignmentMemory
 
 # 引入你所有的具体执行工具
-from Tools.align_tools.align_defect import pipeline_alignment_tool  # 假设这是内检测
+# from Tools.align_tools.align_defect import pipeline_alignment_tool  # 假设这是内检测
+from Tools.align_tools.align_defection import step1_analyze_pipeline_data, step2_generate_alignment_report, calculate_confidence_threshold
 # from Tools.align import data_alignment_tool            # 假设这是其他
 # from Tools.construction import construction_tool     # 假设这是建设期
 
@@ -59,7 +60,7 @@ def node_align_process(state: AgentState):
     
     # 简单的工具映射工厂
     # 实际调用时，你可以根据 scenario 选择不同的 tool
-    target_tool = pipeline_alignment_tool # 默认
+    # target_tool = pipeline_alignment_tool # 默认
     # if scenario == "external":
     #     target_tool = data_alignment_tool
     # elif scenario == "construction":
@@ -71,31 +72,44 @@ def node_align_process(state: AgentState):
 
     # D. 生成向量 (这里先用 Mock，后续你接入真实的 embedding)
     # 真实的逻辑可能是：vector = get_file_embedding(file1)
-    current_vector = [0.1, 0.2, 0.3] 
+    data, error = step1_analyze_pipeline_data.invoke({"filename1": file1, "filename2": file2}) 
+    if error:
+        return {
+            "messages": [AIMessage(content=error)]
+        }
+    file_metric = data['metric']
+    print("file_metric:",file_metric)
+    file_vector = [float(v) for v in file_metric.values()]
+    print("file_vector:",file_vector)
 
     # E. 查库
     db = AlignmentMemory()
-    match = db.search_similar(current_vector)
+    match = db.search_similar(file_vector)
     
     candidates = {}
     match_found = False
     
-    # 定义一个内部函数来跑工具，避免代码重复
-    def run_alignment(thresh, desc):
-        print(f"   🏃 正在执行: {desc} (阈值={thresh})...")
-        try:
-            # 调用你的 LangChain Tool
-            return target_tool.invoke({
-                "filename1": file1,
-                "filename2": file2,
-                "threshold": thresh
-            })
-        except Exception as e:
-            return f"执行出错: {str(e)}"
+    # 计算阈值
+    calculated_min_confidence = calculate_confidence_threshold.invoke({"density_metrics": file_metric})
+    # 设置默认阈值配置
+    default_thresholds = {
+        'distance': 1.0,
+        'clock_position': 45,
+        'length': 10,
+        'width': 10,
+        'depth':2,
+    }
+
+    default_result_msg = step2_generate_alignment_report.invoke({
+        "context_data": data, 
+        "thresholds": default_thresholds,
+        "min_confidence": calculated_min_confidence,
+        "save_type": "default"
+    })
 
     # --- 情况 1: 跑默认参数 (方案 A) ---
     # res_default = run_alignment(extracted_threshold, "默认方案")
-    res_default = "Default res"
+    res_default = default_result_msg
     candidates["Default"] = res_default
     
     # --- 情况 2: 如果命中历史，跑专家参数 (方案 B) ---
@@ -105,7 +119,22 @@ def node_align_process(state: AgentState):
         
         # 获取记忆中的专家参数（这里假设 C 字段存的是阈值，或者其他参数）
         # 如果 C 字段是自然语言，你可能需要用 LLM 把它转回参数
-        expert_val = match['c_value'] 
+        expert_threshold_vector = match['c_value'] 
+
+        expert_thresholds = {
+            'distance':       expert_threshold_vector[0],  # 第1个值
+            'clock_position': expert_threshold_vector[1],  # 第2个值
+            'length':         expert_threshold_vector[2],  # 第3个值
+            'width':          expert_threshold_vector[3],  # 第4个值
+            'depth':          expert_threshold_vector[4],  # 第5个值
+        }
+
+        expert_result_msg = step2_generate_alignment_report.invoke({
+            "context_data": data, 
+            "thresholds": expert_thresholds,
+            "min_confidence": calculated_min_confidence,
+            "save_type": "similar_record"
+        })
         
         # 容错：如果数据库里存的 c_value 是空的，就还是用默认
         # expert_threshold = expert_val if expert_val else extracted_threshold
@@ -114,7 +143,7 @@ def node_align_process(state: AgentState):
         # 注意：这里我们假设专家调整的是“阈值”，如果专家调整的是其他逻辑，
         # 你可能需要给 Tool 传不同的参数
         # res_expert = run_alignment(expert_threshold, "专家方案")
-        res_expert = "Expert"
+        res_expert = expert_result_msg
         candidates["Expert"] = res_expert
         
         msg_content = "计算完成，发现相似历史场景，已生成双重方案。"
@@ -127,7 +156,7 @@ def node_align_process(state: AgentState):
     # =========================================
     return {
         "messages": [AIMessage(content=msg_content)],
-        "align_vector": current_vector,
+        "align_vector": file_vector,
         "align_candidates": candidates,
         "align_match_found": match_found,
         "memory": memory # 保持记忆

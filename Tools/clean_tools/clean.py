@@ -44,58 +44,91 @@ def clean_excel_tool(filename1: str, mapping_config: list, filename2: Optional[s
             previous_row = current_row
         return previous_row[-1]
 
-    def is_similar(a, keywords):
-        """判断字符串是否与关键词列表中的任一关键词相似"""
-        if not a: return 0
-        a = str(a)
-        for k in keywords:
-            if k in a or a in k:
-                return 1
-            d = edit_distance(a, k)
-            len_ratio = min(len(a), len(k)) / max(len(a), len(k)) if max(len(a), len(k)) > 0 else 0
-            if d <= 2 and len_ratio >= 0.5:
-                return 1
-        return 0
+    def calculate_similarity_score(field_name, keyword_list):
+        """
+        计算字段名与关键词列表的匹配分数
+        返回最高分数和对应的标准名称
+        """
+        max_score = 0
+        best_match = None
+
+        for keyword in keyword_list:
+            score = 0
+
+            # 1. 完全匹配最高分
+            if field_name.lower() == keyword.lower():
+                score = 100
+            # 2. 包含关系
+            elif keyword.lower() in field_name.lower() or field_name.lower() in keyword.lower():
+                # 计算包含比例
+                contain_ratio = len(keyword) / len(field_name) if len(field_name) > 0 else 0
+                score = 80 + min(20, contain_ratio * 20)  # 基础80分，根据包含比例加分
+            # 3. 编辑距离匹配
+            else:
+                distance = edit_distance(field_name.lower(), keyword.lower())
+                max_len = max(len(field_name), len(keyword))
+                if max_len > 0:
+                    similarity = 1 - distance / max_len
+                    score = similarity * 60  # 编辑距离匹配最高60分
+
+            # 更新最高分
+            if score > max_score:
+                max_score = score
+                best_match = keyword_list[0]  # 使用列表的第一个作为标准名称
+
+        return max_score, best_match
+
+    def find_best_standardization(field_name, standardization_dict):
+        """
+        为字段名找到最佳的标准名称
+        返回匹配分数和标准名称
+        """
+        best_score = 0
+        best_standard = None
+
+        for std_list in standardization_dict:
+            score, standard_name = calculate_similarity_score(field_name, std_list)
+            if score > best_score:
+                best_score = score
+                best_standard = standard_name
+
+        return best_score, best_standard
 
     def remove_empty_rows(sheet):
-        """删除字段名之前的空行 (逻辑优化版)"""
-        # 为了防止无限循环，设置最大删除行数
-        max_check = 20 
-        deleted_count = 0
-        
-        while deleted_count < max_check:
-            row = list(sheet[1]) # 获取当前第一行
-            is_empty = True
-            for cell in row:
-                if cell.value is not None:
-                    is_empty = False
+        """删除字段名之前的空行"""
+        values = list(sheet['A'])
+        for i in range(len(values)):
+            row = list(sheet[1])
+            count = 0
+            for j in row:
+                if j.value is None:
+                    sheet.delete_rows(idx=1)
                     break
-            
-            if is_empty:
-                sheet.delete_rows(idx=1)
-                deleted_count += 1
-            else:
-                break # 找到非空行，停止删除
+                else:
+                    count = count + 1
+            if count == len(row):
+                break
 
     def standardize_field_names(sheet, dic):
-        """标准化字段名称"""
-        fields = list(sheet[1]) # 获取第一行作为表头
-        dis_loc = 64  # ASCII码中 '@' 的位置
-        
+        """标准化字段名称 - 使用打分机制找到最佳匹配"""
+        fields = list(sheet[1])
+        dis_loc = 64  # ASCII码中 '@' 的位置，下一个是 'A'
+
         for field in fields:
             dis_loc = dis_loc + 1
-            # 如果列数超过 Z，简单的 chr() 会乱码，这里简化处理，假设列数不多
-            if dis_loc > 90: break 
-            
-            val = field.value
-            if val is None: continue
-            
-            for d in dic:
-                if is_similar(str(val), d):
-                    # 找到当前列的位置 (例如 'A1', 'B1')
-                    loc = chr(dis_loc) + '1'
-                    sheet[loc].value = d[0] # 修改为标准名称
-                    break
+            if field.value is None:
+                continue
+
+            field_name = str(field.value).strip()
+            best_score, best_standard = find_best_standardization(field_name, dic)
+
+            # 设置匹配阈值，只有足够相似的才进行标准化
+            if best_score >= 60:  # 阈值可以根据需要调整
+                loc = chr(dis_loc) + '1'
+                sheet[loc].value = best_standard
+                # print(f"字段标准化: '{field_name}' -> '{best_standard}' (匹配分数: {best_score:.1f})")
+            # elif best_score >= 30:  # 中等匹配，可以记录但不修改或根据需要处理
+            #     print(f"字段疑似匹配: '{field_name}' -> '{best_standard}' (匹配分数: {best_score:.1f})")
 
     # ================= 主逻辑 =================
 
