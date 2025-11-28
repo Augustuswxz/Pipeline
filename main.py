@@ -36,10 +36,10 @@ if "graph" not in st.session_state:
 
 # 业务场景
 ALIGNMENT_TYPES = {
-    "自动/智能识别": "auto",
-    "内检测对齐": "internal",
-    "外检测对齐": "external",
-    "建设期对齐": "construction"
+    "内检测+内检测": "internal_internal",
+    "内检测+外检测": "internal_external",
+    "内检测+建设期": "internal_construction", 
+    "内/外检测+环境信息": "inspection_environment"
 }
 
 # =============================================================
