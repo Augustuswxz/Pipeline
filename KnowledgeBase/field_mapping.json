@@ -47,13 +47,6 @@
         ]
     },
     {
-        "standard": "lxt",
-        "aliases": [
-            "wxz",
-            "lzx"
-        ]
-    },
-    {
         "standard": "Peak depth(%)",
         "aliases": [
             "深度(%)",
@@ -175,7 +168,8 @@
         "standard": "Position classification",
         "aliases": [
             "位置分类",
-            "位置 分类"
+            "位置 分类",
+            "位置  分类"
         ]
     },
     {
