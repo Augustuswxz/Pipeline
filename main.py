@@ -14,8 +14,8 @@ from graph import build_graph
 # =============================================================
 # Streamlit 页面设置
 # =============================================================
-st.set_page_config(page_title="AI 数据处理助手", layout="wide")
-st.title("🤖 AI 数据处理助手（LangGraph + Streamlit）")
+st.set_page_config(page_title="智能对齐智能体", layout="wide")
+st.title("🤖 智能对齐智能体（数据清洗 + 数据对齐）")
 
 UPLOAD_DIR = "UploadedFiles"
 GENERATED_DIR = "GeneratedFiles"
